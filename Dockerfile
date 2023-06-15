@@ -25,7 +25,6 @@ FROM alpine:3.16.0
 WORKDIR /app
 
 EXPOSE 7780
-EXPOSE 7781
 
 RUN apk update
 RUN apk add --no-cache tzdata
