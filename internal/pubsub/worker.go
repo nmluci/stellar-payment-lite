@@ -5,10 +5,10 @@ import (
 	"fmt"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/nmluci/go-backend/internal/commonkey"
-	"github.com/nmluci/go-backend/internal/indto"
-	"github.com/nmluci/go-backend/internal/service"
-	"github.com/nmluci/go-backend/internal/util/ctxutil"
+	"github.com/nmluci/stellar-payment-lite/internal/commonkey"
+	"github.com/nmluci/stellar-payment-lite/internal/indto"
+	"github.com/nmluci/stellar-payment-lite/internal/service"
+	"github.com/nmluci/stellar-payment-lite/internal/util/ctxutil"
 	"github.com/rs/zerolog"
 )
 

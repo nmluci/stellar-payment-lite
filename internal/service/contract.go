@@ -3,26 +3,34 @@ package service
 import (
 	"context"
 
-	"github.com/nmluci/go-backend/internal/repository"
-	"github.com/nmluci/go-backend/internal/worker"
-	"github.com/nmluci/go-backend/pkg/dto"
-	"github.com/nmluci/gostellar"
+	"github.com/nmluci/stellar-payment-lite/internal/indto"
+	"github.com/nmluci/stellar-payment-lite/internal/repository"
+	"github.com/nmluci/stellar-payment-lite/pkg/dto"
 	"github.com/rs/zerolog"
 )
 
 type Service interface {
 	Ping() (pingResponse dto.PublicPingResponse)
-	AuthenticateSession(ctx context.Context, token string) (access context.Context, err error)
-	AuthenticateService(ctx context.Context, name string) (access context.Context, err error)
+
+	// Auth
+	FindUserByAccessToken(ctx context.Context, at string) (res *indto.UserRole, err error)
+	AuthLogin(ctx context.Context, payload *dto.AuthLoginPayload) (res *dto.AuthResponse, err error)
+	AuthRefreshToken(ctx context.Context, payload *dto.AuthRefreshTokenPayload) (res *dto.AuthResponse, err error)
+
+	// Users
+	RegisterUser(ctx context.Context, payload *dto.UserRegistrationPayload) (err error)
+	GetUserDetailByID(ctx context.Context, params *dto.UserQueryParams) (res *dto.UserResponse, err error)
+	UpdateUserByID(ctx context.Context, params *dto.UserQueryParams, payload *dto.UserPayload) (err error)
+
+	// Customer
+	GetCustomerByID(ctx context.Context, param *dto.CustomerQueryParams) (res *dto.CustomerResponse, err error)
+	UpdateCustomer(ctx context.Context, param *dto.CustomerQueryParams, payload *dto.CustomerPayload) (err error)
 }
 
 type service struct {
 	logger     zerolog.Logger
 	conf       *serviceConfig
 	repository repository.Repository
-	stellarRPC *gostellar.StellarRPC
-	goStellar  *gostellar.GoStellar
-	fileWorker *worker.WorkerManager
 }
 
 type serviceConfig struct {
@@ -31,9 +39,6 @@ type serviceConfig struct {
 type NewServiceParams struct {
 	Logger     zerolog.Logger
 	Repository repository.Repository
-	StellarRPC *gostellar.StellarRPC
-	GoStellar  *gostellar.GoStellar
-	FileWorker *worker.WorkerManager
 }
 
 func NewService(params *NewServiceParams) Service {
@@ -41,8 +46,5 @@ func NewService(params *NewServiceParams) Service {
 		logger:     params.Logger,
 		conf:       &serviceConfig{},
 		repository: params.Repository,
-		stellarRPC: params.StellarRPC,
-		goStellar:  params.GoStellar,
-		fileWorker: params.FileWorker,
 	}
 }

@@ -1,8 +1,8 @@
 package worker
 
 import (
-	"github.com/nmluci/go-backend/internal/config"
-	"github.com/nmluci/go-backend/internal/repository"
+	"github.com/nmluci/stellar-payment-lite/internal/config"
+	"github.com/nmluci/stellar-payment-lite/internal/repository"
 	"github.com/rs/zerolog"
 )
 

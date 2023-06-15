@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/nmluci/go-backend/internal/config"
+	"github.com/nmluci/stellar-payment-lite/internal/config"
 	"github.com/rs/zerolog"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

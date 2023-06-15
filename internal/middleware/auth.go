@@ -1,32 +1,46 @@
 package middleware
 
 import (
+	"strings"
+
 	"github.com/labstack/echo/v4"
-	"github.com/nmluci/go-backend/internal/service"
-	"github.com/nmluci/go-backend/internal/util/echttputil"
-	"github.com/nmluci/go-backend/pkg/errs"
+	"github.com/nmluci/stellar-payment-lite/internal/commonkey"
+	"github.com/nmluci/stellar-payment-lite/internal/service"
+	"github.com/nmluci/stellar-payment-lite/internal/util/ctxutil"
+	"github.com/nmluci/stellar-payment-lite/internal/util/echttputil"
+	"github.com/nmluci/stellar-payment-lite/pkg/errs"
 )
 
 func AuthorizationMiddleware(svc service.Service) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			header := c.Request().Header
-
 			var err error
+			header := c.Request().Header
 			ctx := c.Request().Context()
-			if token := header.Get("authorization"); token != "" {
-				ctx, err = svc.AuthenticateSession(ctx, token)
-			} else if token := header.Get("st-kagi"); token != "" {
-				ctx, err = svc.AuthenticateService(ctx, token)
-			} else {
+
+			token := header.Get("authorization")
+			if token == "" {
 				return echttputil.WriteErrorResponse(c, errs.ErrNoAccess)
 			}
 
-			if err != nil {
+			splittedToken := strings.Split(token, " ")
+			if len(splittedToken) != 2 {
 				return echttputil.WriteErrorResponse(c, errs.ErrInvalidCred)
 			}
 
-			c.SetRequest(c.Request().Clone(ctx))
+			if splittedToken[0] != "Bearer" {
+				return echttputil.WriteErrorResponse(c, errs.ErrInvalidCred)
+			}
+
+			accessToken := splittedToken[1]
+			user, err := svc.FindUserByAccessToken(ctx, accessToken)
+			if err != nil {
+				return echttputil.WriteErrorResponse(c, errs.ErrInvalidCred)
+			} else if user == nil {
+				return echttputil.WriteErrorResponse(c, errs.ErrNoAccess)
+			}
+
+			c.SetRequest(c.Request().Clone(ctxutil.WrapCtx(ctx, commonkey.SCOPE_CTX_KEY, user)))
 			return next(c)
 		}
 	}

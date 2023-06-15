@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/nmluci/go-backend/internal/config"
+	"github.com/nmluci/stellar-payment-lite/internal/config"
 	"github.com/rs/zerolog"
 )
 

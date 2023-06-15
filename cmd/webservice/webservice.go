@@ -1,44 +1,26 @@
 package webservice
 
 import (
-	"net"
 	"sync"
 
 	"github.com/labstack/echo/v4"
-	"github.com/nmluci/go-backend/cmd/webservice/router"
-	inRPC "github.com/nmluci/go-backend/cmd/webservice/rpc"
-	"github.com/nmluci/go-backend/internal/config"
-	"github.com/nmluci/go-backend/internal/interceptor"
-	"github.com/nmluci/go-backend/internal/repository"
-	"github.com/nmluci/go-backend/internal/service"
-	"github.com/nmluci/go-backend/internal/worker"
-	"github.com/nmluci/gostellar"
-	hentaiRPC "github.com/nmluci/gostellar/pkg/rpc/hentai"
+	"github.com/nmluci/stellar-payment-lite/cmd/webservice/router"
+	"github.com/nmluci/stellar-payment-lite/internal/component"
+	"github.com/nmluci/stellar-payment-lite/internal/config"
+	"github.com/nmluci/stellar-payment-lite/internal/repository"
+	"github.com/nmluci/stellar-payment-lite/internal/service"
 	"github.com/rs/zerolog"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 )
 
-const logTagStartWebservice = "[StartWebservice]"
-
 func Start(conf *config.Config, logger zerolog.Logger) {
-	// db, err := component.InitMariaDB(&component.InitMariaDBParams{
-	// 	Conf:   &conf.MariaDBConfig,
-	// 	Logger: logger,
-	// })
+	db, err := component.InitMariaDB(&component.InitMariaDBParams{
+		Conf:   &conf.MariaDBConfig,
+		Logger: logger,
+	})
 
-	// if err != nil {
-	// 	logger.Fatalf("%s initializing maria db: %+v", logTagStartWebservice, err)
-	// }
-
-	// mongo, err := component.InitMongoDB(&component.InitMongoDBParams{
-	// 	Conf:   &conf.MongoDBConfig,
-	// 	Logger: logger,
-	// })
-
-	// if err != nil {
-	// 	logger.Fatalf("%s initializing maria db: %+v", logTagStartWebservice, err)
-	// }
+	if err != nil {
+		logger.Fatal().Msgf("failed to initialize maria db: %+v", err)
+	}
 
 	// redis, err := component.InitRedis(&component.InitRedisParams{
 	// 	Conf:   &conf.RedisConfig,
@@ -49,40 +31,20 @@ func Start(conf *config.Config, logger zerolog.Logger) {
 	// 	logger.Fatalf("%s initalizing redis: %+v", logTagStartWebservice, err)
 	// }
 
-	gs := gostellar.NewGoStellar(gostellar.NewGoStellarParams{
-		Logger:      &logger,
-		ServiceName: conf.ServiceID,
-	})
-
 	ec := echo.New()
 	ec.HideBanner = true
 	ec.HidePort = true
 
 	repo := repository.NewRepository(&repository.NewRepositoryParams{
-		Logger: logger,
-		// MariaDB: db,
-		// MongoDB:    mongo,
+		Logger:  logger,
+		MariaDB: db,
 		// Redis: redis,
-	})
-
-	swork := worker.NewWorkerManager(worker.NewWorkerManagerParams{
-		Logger:     logger,
-		Config:     &conf.WorkerConfig,
-		Repository: repo,
 	})
 
 	service := service.NewService(&service.NewServiceParams{
 		Logger:     logger,
 		Repository: repo,
-		StellarRPC: gs.StellarRPC,
-		FileWorker: swork,
 	})
-
-	// psWorker := pubsub.NewFileSub(pubsub.NewFilePubSubParams{
-	// 	Logger: logger,
-	// 	// Redis:   redis,
-	// 	Service: service,
-	// })
 
 	router.Init(&router.InitRouterParams{
 		Logger:  logger,
@@ -96,12 +58,6 @@ func Start(conf *config.Config, logger zerolog.Logger) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		swork.StartWorker(5)
-	}()
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
 		logger.Info().Msgf("starting service, listening to: %s", conf.ServiceAddress)
 
 		if err := ec.Start(conf.ServiceAddress); err != nil {
@@ -109,29 +65,5 @@ func Start(conf *config.Config, logger zerolog.Logger) {
 		}
 	}()
 
-	rpcServer := grpc.NewServer(grpc.UnaryInterceptor(interceptor.WithServerInteceptor(service)))
-	rpcService := inRPC.Init(service)
-	hentaiRPC.RegisterNakaZettaiDameServer(rpcServer, rpcService)
-	reflection.Register(rpcServer)
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		if conn, err := net.Listen("tcp", conf.RPCAddress); err == nil {
-			logger.Info().Msgf("starting rpc, listening to: %s", conf.RPCAddress)
-			if err := rpcServer.Serve(conn); err != nil {
-				logger.Info().Msgf("starting rpc, cause: %+v", err)
-			}
-		}
-	}()
-
-	// wg.Add(1)
-	// go func() {
-	// 	defer wg.Done()
-	// 	psWorker.Listen()
-	// }()
-
 	wg.Wait()
-
-	swork.StopManager()
 }

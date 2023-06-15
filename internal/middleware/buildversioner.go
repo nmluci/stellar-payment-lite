@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/nmluci/go-backend/internal/config"
+	"github.com/nmluci/stellar-payment-lite/internal/config"
 )
 
 func ServiceVersioner(next echo.HandlerFunc) echo.HandlerFunc {

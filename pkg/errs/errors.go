@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/nmluci/go-backend/pkg/constant"
-	"github.com/nmluci/go-backend/pkg/dto"
+	"github.com/nmluci/stellar-payment-lite/pkg/constant"
+	"github.com/nmluci/stellar-payment-lite/pkg/dto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -18,6 +18,7 @@ var (
 	ErrNoAccess            = errors.New("user does not have required access privilege")
 	ErrUnknown             = errors.New("internal server error")
 	ErrNotFound            = errors.New("resources not found")
+	ErrRouteNotImplemented = errors.New("route not found")
 )
 
 const (
@@ -28,15 +29,17 @@ const (
 	ErrCodeDuplicatedResources constant.ErrCode = 5
 	ErrCodeBrokenUserReq       constant.ErrCode = 6
 	ErrCodeNotFound            constant.ErrCode = 7
+	ErrCodeRouteNotImplemented constant.ErrCode = 9999
 )
 
 const (
-	ErrStatusUnknown     = http.StatusInternalServerError
-	ErrStatusClient      = http.StatusBadRequest
-	ErrStatusNotLoggedIn = http.StatusUnauthorized
-	ErrStatusNoAccess    = http.StatusForbidden
-	ErrStatusReqBody     = http.StatusUnprocessableEntity
-	ErrStatusNotFound    = http.StatusNotFound
+	ErrStatusUnknown        = http.StatusInternalServerError
+	ErrStatusClient         = http.StatusBadRequest
+	ErrStatusNotLoggedIn    = http.StatusUnauthorized
+	ErrStatusNoAccess       = http.StatusForbidden
+	ErrStatusReqBody        = http.StatusUnprocessableEntity
+	ErrStatusNotFound       = http.StatusNotFound
+	ErrStatusNotImplemented = http.StatusNotImplemented
 )
 
 var errorMap = map[error]dto.ErrorResponse{
@@ -47,6 +50,7 @@ var errorMap = map[error]dto.ErrorResponse{
 	ErrDuplicatedResources: ErrorResponse(ErrStatusClient, ErrCodeDuplicatedResources, ErrDuplicatedResources),
 	ErrBrokenUserReq:       ErrorResponse(ErrStatusReqBody, ErrCodeBrokenUserReq, ErrBrokenUserReq),
 	ErrNotFound:            ErrorResponse(ErrStatusNotFound, ErrCodeNotFound, ErrNotFound),
+	ErrRouteNotImplemented: ErrorResponse(ErrStatusNotImplemented, ErrCodeRouteNotImplemented, ErrRouteNotImplemented),
 }
 
 var errorRPCMap = map[error]error{

@@ -3,27 +3,30 @@ package config
 import (
 	"log"
 	"os"
-	"strings"
+	"time"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	ServiceName    string          `json:"serviceName"`
-	ServiceAddress string          `json:"servicePort"`
-	ServiceID      string          `json:"serviceID"`
-	RPCAddress     string          `json:"rpcAddress"`
-	TrustedService map[string]bool `json:"trustedService"`
-	Environment    Environment     `json:"environment"`
+	ServiceName    string      `json:"serviceName"`
+	ServiceAddress string      `json:"servicePort"`
+	Environment    Environment `json:"environment"`
 
 	BuildVer  string
 	BuildTime string
 
-	WorkerConfig  WorkerConfig     `json:"workerConfig"`
-	MariaDBConfig MariaDBConfig    `json:"mariaDBConfig"`
-	MongoDBConfig MongoDBConfig    `json:"mongoDBConfig"`
-	RedisConfig   RedisConfig      `json:"redisConfig"`
-	StellarConfig StellarRPCConfig `json:"stellarRPCConfig"`
+	WorkerConfig  WorkerConfig  `json:"workerConfig"`
+	MariaDBConfig MariaDBConfig `json:"mariaDBConfig"`
+	MongoDBConfig MongoDBConfig `json:"mongoDBConfig"`
+	RedisConfig   RedisConfig   `json:"redisConfig"`
+
+	JWT_ISSUER         string
+	JWT_AT_EXPIRATION  time.Duration
+	JWT_RT_EXPIRATION  time.Duration
+	JWT_SIGNING_METHOD jwt.SigningMethod
+	JWT_SIGNATURE_KEY  []byte
 }
 
 const logTagConfig = "[Init Config]"
@@ -36,8 +39,6 @@ func Init(buildTime, buildVer string) {
 	conf := Config{
 		ServiceName:    os.Getenv("SERVICE_NAME"),
 		ServiceAddress: os.Getenv("SERVICE_ADDR"),
-		ServiceID:      os.Getenv("SERVICE_ID"),
-		RPCAddress:     os.Getenv("GPRC_ADDR"),
 		MariaDBConfig: MariaDBConfig{
 			Address:  os.Getenv("MARIADB_ADDRESS"),
 			Username: os.Getenv("MARIADB_USERNAME"),
@@ -54,10 +55,6 @@ func Init(buildTime, buildVer string) {
 			Address:  os.Getenv("REDIS_ADDRESS"),
 			Port:     os.Getenv("REDIS_PORT"),
 			Password: os.Getenv("REDIS_PASSWORD"),
-		},
-		StellarConfig: StellarRPCConfig{
-			AuthAddr: os.Getenv("AUTH_ADDR"),
-			AuthKey:  os.Getenv("AUTH_KEY"),
 		},
 		WorkerConfig: WorkerConfig{},
 		BuildVer:     buildVer,
@@ -83,16 +80,12 @@ func Init(buildTime, buildVer string) {
 
 	conf.Environment = Environment(envString)
 
-	conf.TrustedService = map[string]bool{conf.ServiceID: true}
-	if trusted := os.Getenv("TRUSTED_SERVICES"); trusted == "" {
-		conf.TrustedService["STELLAR_HENTAI"] = true
-	} else {
-		for _, svc := range strings.Split(trusted, ",") {
-			if _, ok := conf.TrustedService[svc]; !ok {
-				conf.TrustedService[svc] = true
-			}
-		}
-	}
+	conf.Environment = Environment(envString)
+	conf.JWT_ISSUER = os.Getenv("JWT_ISSUER")
+	conf.JWT_SIGNING_METHOD = jwt.SigningMethodHS256
+	conf.JWT_SIGNATURE_KEY = []byte(os.Getenv("JWT_SIGNATURE_KEY"))
+	conf.JWT_AT_EXPIRATION = time.Duration(2) * time.Hour
+	conf.JWT_RT_EXPIRATION = time.Duration(24) * time.Hour
 
 	config = &conf
 }
