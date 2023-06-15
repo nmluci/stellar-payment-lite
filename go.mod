@@ -12,7 +12,6 @@ require (
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/joho/godotenv v1.4.0
 	github.com/labstack/echo/v4 v4.9.0
-	github.com/nmluci/gostellar v1.5.1
 	github.com/rs/zerolog v1.29.1
 	go.mongodb.org/mongo-driver v1.10.1
 	golang.org/x/crypto v0.7.0
