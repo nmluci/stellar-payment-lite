@@ -33,6 +33,7 @@ ENV cp /usr/share/zoneinfo/Asia/Makassar /etc/localtime
 RUN echo "Asia/Makassar" > /etc/timezone
 
 COPY --from=build /app/conf /app/conf
+COPY --from=build /app/migrations /app/migrations
 COPY --from=build /app/main /app/main
 
 CMD ["/app/main"]
