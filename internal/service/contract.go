@@ -25,6 +25,20 @@ type Service interface {
 	// Customer
 	GetCustomerByID(ctx context.Context, param *dto.CustomerQueryParams) (res *dto.CustomerResponse, err error)
 	UpdateCustomer(ctx context.Context, param *dto.CustomerQueryParams, payload *dto.CustomerPayload) (err error)
+
+	// Accounts
+	GetAccountByUser(ctx context.Context) (res []*dto.AccountResponse, err error)
+	CreateAccount(ctx context.Context, payload *dto.AccountRequest) (err error)
+
+	// Merchants
+	GetMerchants(ctx context.Context) (res []*dto.MerchantResponse, err error)
+	CreateMerchant(ctx context.Context, payload *dto.MerchantRequest) (err error)
+	FindMerchantSettlements(ctx context.Context, payload *dto.MerchantQueryParams) (res []*dto.MerchantSettlement, err error)
+
+	// Transactions
+	GetTransactionHistoryByUser(ctx context.Context, params *dto.AccountQueryParams) (res []*dto.TransactionResponse, err error)
+	CreateTransactionP2P(ctx context.Context, params *dto.TransactionRequest) (err error)
+	CreateTransactionMerchant(ctx context.Context, params *dto.TransactionRequest) (err error)
 }
 
 type service struct {

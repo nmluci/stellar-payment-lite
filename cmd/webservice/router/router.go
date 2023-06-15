@@ -52,5 +52,27 @@ func Init(params *InitRouterParams) {
 	secureRouter.PUT(CustomerIDBasepath, handler.HandleUpdateCustomerDetail(params.Service.UpdateCustomer))
 	secureRouter.OPTIONS(CustomerIDBasepath, handler.HandleUpdateCustomerDetail(params.Service.UpdateCustomer))
 
+	// Accounts
+	secureRouter.GET(AccountBasepath, handler.HandleGetAccountByUser(params.Service.GetAccountByUser))
+	secureRouter.OPTIONS(AccountBasepath, handler.HandleGetAccountByUser(params.Service.GetAccountByUser))
+	secureRouter.POST(AccountBasepath, handler.HandleCreateAccount(params.Service.CreateAccount))
+	secureRouter.OPTIONS(AccountBasepath, handler.HandleCreateAccount(params.Service.CreateAccount))
+	secureRouter.GET(AccountTransactionPath, handler.HandleGetTransactionHistoryByUser(params.Service.GetTransactionHistoryByUser))
+	secureRouter.OPTIONS(AccountTransactionPath, handler.HandleGetTransactionHistoryByUser(params.Service.GetTransactionHistoryByUser))
+
+	// Merchants
+	secureRouter.GET(MerchantBasepath, handler.HandleGetMerchant(params.Service.GetMerchants))
+	secureRouter.OPTIONS(MerchantBasepath, handler.HandleGetMerchant(params.Service.GetMerchants))
+	secureRouter.POST(MerchantBasepath, handler.HandleCreateMerchant(params.Service.CreateMerchant))
+	secureRouter.OPTIONS(MerchantBasepath, handler.HandleCreateMerchant(params.Service.CreateMerchant))
+	secureRouter.GET(MerchantSettlementPath, handler.HandleFindMerchantSettlements(params.Service.FindMerchantSettlements))
+	secureRouter.OPTIONS(MerchantSettlementPath, handler.HandleFindMerchantSettlements(params.Service.FindMerchantSettlements))
+
+	// Transactions
+	secureRouter.POST(TransactionP2PPath, handler.HandleCreateTransactionP2P(params.Service.CreateTransactionP2P))
+	secureRouter.OPTIONS(TransactionP2PPath, handler.HandleCreateTransactionP2P(params.Service.CreateTransactionP2P))
+	secureRouter.POST(TransactionMerchantPath, handler.HandleCreateTransactionMerchant(params.Service.CreateTransactionMerchant))
+	secureRouter.OPTIONS(TransactionMerchantPath, handler.HandleCreateTransactionMerchant(params.Service.CreateTransactionMerchant))
+
 	plainRouter.Any("*", HandleNotImplemented)
 }

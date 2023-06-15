@@ -23,6 +23,25 @@ type Repository interface {
 	// Customers
 	FindCustomerByID(ctx context.Context, id int64) (res *model.Customer, err error)
 	UpdateCustomer(ctx context.Context, payload *model.Customer) (err error)
+
+	// Accounts
+	FindAccountByUserID(ctx context.Context, userID int64) (res []*model.Account, err error)
+	FindAccountByID(ctx context.Context, accountID int64) (res *model.Account, err error)
+	InsertAccount(ctx context.Context, payload *model.Account) (err error)
+	UpdateAccount(ctx context.Context, payload *model.Account) (err error)
+
+	// Merchants
+	FindMerchants(ctx context.Context) (res []*model.Merchant, err error)
+	FindMerchantByID(ctx context.Context, merchantID int64) (res *model.Merchant, err error)
+	InsertMerchant(ctx context.Context, payload *model.Merchant) (err error)
+
+	// Transactions
+	FindTransactionByAccountID(ctx context.Context, accountID int64) (res []*indto.TranasctionHistory, err error)
+	InsertTransactionP2P(ctx context.Context, payload *model.Transaction) (err error)
+	InsertTransactionMerchant(ctx context.Context, payload *model.Transaction) (err error)
+
+	// Settlements
+	FindSettlementByMerchantID(ctx context.Context, merchantID int64) (res []*indto.SettlementDetail, err error)
 }
 
 type repository struct {

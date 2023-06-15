@@ -20,3 +20,11 @@ type Settlement struct {
 	Nominal       float32 `db:"nominal"`
 	Status        int64   `db:"status"`
 }
+
+type Merchant struct {
+	ID           int64  `db:"id"`
+	Name         string `db:"name"`
+	Address      string `db:"address"`
+	Phone        string `db:"phone"`
+	MerchantCode string `db:"merchant_code"`
+}
