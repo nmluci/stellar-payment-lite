@@ -2,7 +2,7 @@ version: '3.5'
 services:
   backend:
     container_name: stellar-payment-lite-backend
-    image: "nmluci/stellar-payment-lte-be:${$BUILD_TAG}"
+    image: "nmluci/stellar-payment-lte-be:$BUILD_TAG"
     build: 
       context: .
       args:
